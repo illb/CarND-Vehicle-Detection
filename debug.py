@@ -51,7 +51,7 @@ def show_hog_features(img):
     plt.title('HOG Visualization')
     plt.show()
 
-img = car_data.sample_image()
+# img = car_data.sample_image()
 # show_hog_features(img)
 
 #######################################
@@ -70,4 +70,5 @@ def show_slide_windows(img):
     plt.title('Slide Windows')
     plt.show()
 
+img = util.imread(data.get_test_paths()[0])
 show_slide_windows(img)
