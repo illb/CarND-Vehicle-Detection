@@ -12,6 +12,7 @@ from util import rgb
 
 ######################################
 
+
 def show_sample_car_data(car_data, not_car_data):
     print('Your function returned a count of',
           car_data.len, ' cars and',
@@ -20,8 +21,8 @@ def show_sample_car_data(car_data, not_car_data):
           car_data.image_data_type)
 
     # Read in car / not-car images
-    car_image = mpimg.imread(car_data.sample_image())
-    notcar_image = mpimg.imread(not_car_data.sample_image())
+    car_image = car_data.sample_image()
+    notcar_image = not_car_data.sample_image()
 
     # Plot the examples
     # fig = plt.figure()
@@ -38,13 +39,15 @@ car_data, not_car_data = data.get_car_data()
 
 #######################################
 
+
 def show_hog_features(img):
-    features, hog_image = feature.get_hog_features(img, visualise=True)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    features, hog_image = feature.get_hog_features(gray, vis=True)
 
     # Plot the examples
     fig = plt.figure()
     plt.subplot(121)
-    plt.imshow(img, cmap='gray')
+    plt.imshow(gray, cmap='gray')
     plt.title('Example Car Image')
     plt.subplot(122)
     plt.imshow(hog_image, cmap='gray')
@@ -53,6 +56,7 @@ def show_hog_features(img):
 
 # img = car_data.sample_image()
 # show_hog_features(img)
+
 
 #######################################
 def show_slide_windows(img):
