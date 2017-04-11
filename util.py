@@ -1,11 +1,15 @@
 import numpy as np
 import cv2
+import time
+
 
 def imread(path):
     return cv2.imread(path)
 
+
 def rgb(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
 
 def to_color_space(image, color_space = 'RGB'):
     result = None
@@ -26,6 +30,7 @@ def to_color_space(image, color_space = 'RGB'):
         result = np.copy(image)
     return result
 
+
 # Define a function to draw bounding boxes
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
     # Make a copy of the image
@@ -36,3 +41,14 @@ def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
         cv2.rectangle(imcopy, bbox[0], bbox[1], color, thick)
     # Return the image copy with boxes drawn
     return imcopy
+
+
+class Timer:
+    def __init__(self, name):
+        self.name = name
+        self.start = time.time()
+        print("{} started".format(self.name))
+
+    def finish(self):
+        elap = round(time.time() - self.start, 7)
+        print("{}: sec={}".format(self.name, elap))
