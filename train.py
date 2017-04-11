@@ -1,14 +1,18 @@
 import numpy as np
-import time
+import util
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 
 import data, feature
-
 car_data, not_car_data = data.get_car_data()
 
-car_features = feature.extract_features(car_data)
-notcar_features = feature.extract_features(not_car_data)
+params = data.ModelParams()
+
+print("--------------------------------------")
+timer = util.Timer("extract features")
+car_features = feature.extract_features(car_data, params=params)
+notcar_features = feature.extract_features(not_car_data, params=params)
+timer.finish()
 
 feature_list = [car_features, notcar_features]
 # Create an array stack, NOTE: StandardScaler() expects np.float64
@@ -29,22 +33,27 @@ rand_state = np.random.randint(0, 100)
 X_train, X_test, y_train, y_test = train_test_split(
     scaled_X, y, test_size=0.2, random_state=rand_state)
 
+print("--------------------------------------")
+print("train count={}, test count={}".format(len(X_train), len(X_test)))
 print('Feature vector length:', len(X_train[0]))
+
+print("--------------------------------------")
 # Use a linear SVC (support vector classifier)
 svc = LinearSVC()
 # Check the training time for the SVC
-t=time.time()
+timer = util.Timer("train SVC")
 svc.fit(X_train, y_train)
-t2 = time.time()
-print(round(t2-t, 2), 'Seconds to train SVC...')
+timer.finish()
+
+
+print("--------------------------------------")
 # Check the score of the SVC
 print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 # Check the prediction time for a single sample
-t=time.time()
-n_predict = 10
-print('My SVC predicts: ', svc.predict(X_test[0:n_predict]))
-print('For these',n_predict, 'labels: ', y_test[0:n_predict])
-t2 = time.time()
-print(round(t2-t, 5), 'Seconds to predict', n_predict,'labels with SVC')
+predict_num = 10
+timer = util.Timer("predict with SVC (predict_num = {})".format(predict_num))
+print('predicts: ', svc.predict(X_test[0:predict_num]))
+print('actual labels: ', y_test[0:predict_num])
+timer.finish()
 
-data.save_model(svc, X_scaler)
+data.save_model(svc, X_scaler, params)
