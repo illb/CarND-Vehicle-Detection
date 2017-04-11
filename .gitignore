@@ -1,6 +1,6 @@
 .DS_Store
 .idea/
-data/
+train_images/
 logs/
 result/
 work/
