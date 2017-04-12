@@ -1,5 +1,4 @@
-##Writeup Template
-###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
+##Writeup
 
 ---
 
@@ -30,19 +29,38 @@ The goals / steps of this project are the following:
 ---
 ###Writeup / README
 
-####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Vehicle-Detection/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
+####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.
 
 You're reading it!
+
+###Source Files
+* debug.py : sandbox for debugging
+* debug_interative_window_search.ipynb : sandbox for window search debugging
+* train.py : train data
+* process.py : detection pipeline process
+* movie.py : make the output video
+* modules
+  * data.py : data list functions
+  * camera_calibration.py : camera calibration functions
+  * feature.py : feature extraction functions
 
 ###Histogram of Oriented Gradients (HOG)
 
 ####1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in the first code cell of the IPython notebook (or in lines # through # of the file called `some_file.py`).  
+* The code for feature extraction functions are in the file called `feature.py`.  
 
-I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
+* I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
-![alt text][image1]
+* vehicle
+
+![vehicle1](./output_images/train_vehicle_001.png =64x)
+
+* non vehicle
+
+![non_vehicle1](./output_images/train_non_vehicle_001.png =64x)
+
+* 
 
 I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
 
