@@ -20,22 +20,13 @@ def pipeline(img):
 
     undist = cc.undistort(img, mtx, dist)
 
-    bboxes = ws.find_cars(undist, svc, X_scaler, params)
-
-    heat = np.zeros_like(undist[:, :, 0]).astype(np.float)
-    # Add heat to each box in box list
-    heat = ws.add_heat(heat, bboxes)
-
-    # Apply threshold to help remove false positives
-    heat = ws.apply_threshold(heat, 1)
-
-    # Visualize the heatmap when displaying
-    heatmap = np.clip(heat, 0, 255)
+    heatmap = ws.find_car_map(undist, svc, X_scaler, params)
 
     from scipy.ndimage.measurements import label
 
     # Find final boxes from heatmap using label function
     labels = label(heatmap)
+
     draw_img = ws.draw_labeled_bboxes(np.copy(undist), labels)
 
     result = cv2.cvtColor(draw_img, cv2.COLOR_BGR2RGB)

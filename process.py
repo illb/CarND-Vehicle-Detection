@@ -40,35 +40,41 @@ def show_serach_windows():
 
 ################################
 
-bboxes = ws.find_cars(image, svc, X_scaler, params)
+
+import random
+def _rand256():
+    return random.randrange(0, 256)
+
+ystart = 400
+ystop = 656
+scale = 1.5
+
+bboxes, target_bboxes = ws.find_car_bboxes(image, svc, X_scaler, params, debug=True,
+                                           ystart=ystart, ystop=ystop, scale=scale)
 
 def show_find_cars():
     draw_img = np.copy(image)
+    for bbox in target_bboxes:
+        cv2.rectangle(draw_img, bbox[0], bbox[1], (_rand256(), _rand256(), _rand256()), 2)
     for bbox in bboxes:
         cv2.rectangle(draw_img, bbox[0], bbox[1], (0, 0, 255), 6)
+    cv2.rectangle(draw_img, (0, ystart), (img_size[0], ystop), (255, 0, 0), 6)
 
     plt.imshow(util.rgb(draw_img))
     plt.show()
 
-# show_find_cars()
+show_find_cars()
 
 ################################
 
 def show_heat():
-    heat = np.zeros_like(image[:,:,0]).astype(np.float)
-    # Add heat to each box in box list
-    heat = ws.add_heat(heat, bboxes)
-
-    # Apply threshold to help remove false positives
-    heat = ws.apply_threshold(heat, 1)
-
-    # Visualize the heatmap when displaying
-    heatmap = np.clip(heat, 0, 255)
+    heatmap = ws.find_car_map(image, svc, X_scaler, params)
 
     from scipy.ndimage.measurements import label
 
     # Find final boxes from heatmap using label function
     labels = label(heatmap)
+
     draw_img = ws.draw_labeled_bboxes(np.copy(image), labels)
 
     fig = plt.figure()
@@ -81,4 +87,4 @@ def show_heat():
     fig.tight_layout()
     plt.show()
 
-show_heat()
+#show_heat()

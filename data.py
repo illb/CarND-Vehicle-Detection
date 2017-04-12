@@ -40,7 +40,7 @@ def get_test_paths():
 
 
 def get_video_paths():
-    res = ["project_video.mp4", "test_video.mp4"]
+    res = ["test_video.mp4", "project_video.mp4"]
     return res
 
 
@@ -49,9 +49,9 @@ class ModelParams:
         self.color_space = 'YCrCb'  # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
 
         self.spatial_feat = True  # Spatial features on or off
-        self.spatial_size = (32, 32)  # Spatial binning dimensions
+        self.spatial_size = (64, 64)  # Spatial binning dimensions
 
-        self.hist_feat = False  # Histogram features on or off
+        self.hist_feat = True  # Histogram features on or off
         self.hist_bins = 32  # Number of histogram bins
         self.hist_range = (0, 256)
 

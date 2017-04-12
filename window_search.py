@@ -77,12 +77,12 @@ def search_windows(img, windows, clf, scaler, params: data.ModelParams):
 
 ystart = 400
 ystop = 656
-scale = 1.5
-
+scale = 1.0
 
 # Define a single function that can extract features using hog sub-sampling and make predictions
-def find_cars(img, svc, X_scaler, params: data.ModelParams, ystart=ystart, ystop=ystop, scale=scale):
+def find_car_bboxes(img, svc, X_scaler, params: data.ModelParams, debug=False, ystart=ystart, ystop=ystop, scale=scale):
     bboxes = []
+    target_bboxes = []
     tosearch = util.to_color_space(img[ystart:ystop, :, :], params.color_space)
     tosearch = feature.normalize(tosearch)
 
@@ -93,7 +93,7 @@ def find_cars(img, svc, X_scaler, params: data.ModelParams, ystart=ystart, ystop
     # Define blocks and steps as above
     nxblocks = (tosearch.shape[1] // params.hog_pix_per_cell) - 1
     nyblocks = (tosearch.shape[0] // params.hog_pix_per_cell) - 1
-    nfeat_per_block = params.hog_orient * params.hog_cell_per_block ** 2
+    # nfeat_per_block = params.hog_orient * params.hog_cell_per_block ** 2
     # 64 was the orginal sampling rate, with 8 cells and 8 pix per cell
     window = 64
     nblocks_per_window = (window // params.hog_pix_per_cell) - 1
@@ -110,11 +110,11 @@ def find_cars(img, svc, X_scaler, params: data.ModelParams, ystart=ystart, ystop
     hog3 = feature.get_hog_features(ch3, params.hog_orient, params.hog_pix_per_cell, params.hog_cell_per_block, feature_vec=False)
     for xb in range(nxsteps):
         for yb in range(nysteps):
-            ypos = yb * cells_per_step
-            xpos = xb * cells_per_step
+            y_cell = yb * cells_per_step
+            x_cell = xb * cells_per_step
 
-            xleft = xpos * params.hog_pix_per_cell
-            ytop = ypos * params.hog_pix_per_cell
+            xleft = x_cell * params.hog_pix_per_cell
+            ytop = y_cell * params.hog_pix_per_cell
 
             # Extract the image patch
             subimg = cv2.resize(tosearch[ytop:ytop + window, xleft:xleft + window], (64, 64))
@@ -130,9 +130,9 @@ def find_cars(img, svc, X_scaler, params: data.ModelParams, ystart=ystart, ystop
 
             if params.hog_feat:
                 # Extract HOG for this patch
-                hog_feat1 = hog1[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
-                hog_feat2 = hog2[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
-                hog_feat3 = hog3[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel()
+                hog_feat1 = hog1[y_cell:y_cell + nblocks_per_window, x_cell:x_cell + nblocks_per_window].ravel()
+                hog_feat2 = hog2[y_cell:y_cell + nblocks_per_window, x_cell:x_cell + nblocks_per_window].ravel()
+                hog_feat3 = hog3[y_cell:y_cell + nblocks_per_window, x_cell:x_cell + nblocks_per_window].ravel()
                 hog_features = np.hstack((hog_feat1, hog_feat2, hog_feat3))
                 img_features.append(hog_features)
 
@@ -142,15 +142,19 @@ def find_cars(img, svc, X_scaler, params: data.ModelParams, ystart=ystart, ystop
             test_features = X_scaler.transform(features)
             test_prediction = svc.predict(test_features)
 
+            box_x = np.int(xleft * scale)
+            box_y = np.int(ytop * scale)
+            box_window = np.int(window * scale)
+            pt1 = (box_x, box_y + ystart)
+            pt2 = (box_x + box_window, box_y + box_window + ystart)
+            if debug:
+                target_bboxes.append((pt1, pt2))
             if test_prediction == 1:
-                xbox_left = np.int(xleft * scale)
-                ytop_draw = np.int(ytop * scale)
-                win_draw = np.int(window * scale)
-                pt1 = (xbox_left, ytop_draw + ystart)
-                pt2 = (xbox_left + win_draw, ytop_draw + win_draw + ystart)
                 bboxes.append((pt1, pt2))
-
-    return bboxes
+    if debug:
+        return bboxes, target_bboxes
+    else:
+        return bboxes
 
 ##################################
 
@@ -186,3 +190,22 @@ def draw_labeled_bboxes(img, labels):
         cv2.rectangle(img, bbox[0], bbox[1], (0,0,255), 6)
     # Return the image
     return img
+
+
+scales = [1.0, 2.0, 4.0, 8.0, 16.0]
+def find_car_map(undist, svc, X_scaler, params):
+    bboxes = []
+    for scale in scales:
+        bboxes.extend(find_car_bboxes(undist, svc, X_scaler, params, scale=scale))
+
+    heat = np.zeros_like(undist[:, :, 0]).astype(np.float)
+    # Add heat to each box in box list
+    heat = add_heat(heat, bboxes)
+
+    # Apply threshold to help remove false positives
+    heat = apply_threshold(heat, 4)
+
+    # Visualize the heatmap when displaying
+    heatmap = np.clip(heat, 0, 255)
+
+    return heatmap
