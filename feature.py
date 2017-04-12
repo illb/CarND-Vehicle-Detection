@@ -28,7 +28,7 @@ def get_hog_features(img, orient=9, pix_per_cell=8, cell_per_block=2,
 
 
 # Define a function to compute binned color features
-def bin_spatial(img, size=(64, 64)):
+def bin_spatial(img, size=(32, 32)):
     # Use cv2.resize().ravel() to create the feature vector
     features = cv2.resize(img, size).ravel()
     # Return the feature vector

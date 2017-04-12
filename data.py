@@ -49,7 +49,7 @@ class ModelParams:
         self.color_space = 'YCrCb'  # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
 
         self.spatial_feat = True  # Spatial features on or off
-        self.spatial_size = (64, 64)  # Spatial binning dimensions
+        self.spatial_size = (32, 32)  # Spatial binning dimensions
 
         self.hist_feat = True  # Histogram features on or off
         self.hist_bins = 32  # Number of histogram bins
