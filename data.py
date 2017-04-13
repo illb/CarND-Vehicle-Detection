@@ -22,11 +22,13 @@ class CarData:
 
 
 def get_car_data():
-    cars = glob.glob('train_images/vehicles/*/*.png')
-    notcars = glob.glob('train_images/non-vehicles/*/*.png')
+    cars1 = glob.glob('train_images/vehicles/*/*.png')
+    cars2 = glob.glob('train_images/vehicles/*/*.jpeg')
+    notcars1 = glob.glob('train_images/non-vehicles/*/*.png')
+    notcars2 = glob.glob('train_images/non-vehicles/*/*.jpeg')
 
-    car_data = CarData(cars, True)
-    not_car_data = CarData(notcars, False)
+    car_data = CarData(np.concatenate((cars1, cars2)), True)
+    not_car_data = CarData(np.concatenate((notcars1, notcars2)), False)
 
     return car_data, not_car_data
 

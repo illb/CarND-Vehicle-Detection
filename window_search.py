@@ -4,77 +4,6 @@ import feature
 import util
 import data
 
-# Define a function that takes an image,
-# start and stop positions in both x and y, window size (x and y dimensions),
-# and overlap fraction (for both x and y)
-def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
-                 xy_window=(64, 64), xy_overlap=(0.5, 0.5)):
-    # If x and/or y start/stop positions not defined, set to image size
-    if x_start_stop[0] is None:
-        x_start_stop[0] = 0
-    if x_start_stop[1] is None:
-        x_start_stop[1] = img.shape[1]
-    if y_start_stop[0] is None:
-        y_start_stop[0] = 0
-    if y_start_stop[1] is None:
-        y_start_stop[1] = img.shape[0]
-
-    # Compute the span of the region to be searched
-    x_span = x_start_stop[1] - x_start_stop[0]
-    y_span = y_start_stop[1] - y_start_stop[0]
-
-    # Compute the number of pixels per step in x/y
-    window_w = xy_window[0]
-    window_h = xy_window[1]
-    x_pixels_per_step = np.int(window_w * (1.0 - xy_overlap[0]))
-    y_pixels_per_step = np.int(window_h * (1.0 - xy_overlap[1]))
-
-    # Compute the number of windows in x/y
-    x_overlap_buffer = np.int(window_w * (xy_overlap[0]))
-    y_overlap_buffer = np.int(window_h * (xy_overlap[1]))
-    x_window_count = np.int((x_span - x_overlap_buffer) / x_pixels_per_step)
-    y_window_count = np.int((y_span - y_overlap_buffer) / y_pixels_per_step)
-
-    # Initialize a list to append window positions to
-    window_list = []
-    # Loop through finding x and y window positions
-    #     Note: you could vectorize this step, but in practice
-    #     you'll be considering windows one by one with your
-    #     classifier, so looping makes sense
-    for y_window_index in range(y_window_count):
-        for x_window_index in range(x_window_count):
-            # Calculate window position
-            start_x = x_window_index * x_pixels_per_step + x_start_stop[0]
-            end_x = start_x + window_w
-            start_y = y_window_index * y_pixels_per_step + y_start_stop[0]
-            end_y = start_y + window_h
-            # Append window position to list
-            window_list.append(((start_x, start_y), (end_x, end_y)))
-    # Return the list of windows
-    return window_list
-
-
-# Define a function you will pass an image
-# and the list of windows to be searched (output of slide_windows())
-def search_windows(img, windows, clf, scaler, params: data.ModelParams):
-    # 1) Create an empty list to receive positive detection windows
-    on_windows = []
-    # 2) Iterate over all windows in the list
-    for window in windows:
-        # 3) Extract the test window from original image
-        test_img = cv2.resize(img[window[0][1]:window[1][1], window[0][0]:window[1][0]], (64, 64))
-        # 4) Extract features for that window using single_img_features()
-        features = feature.single_img_features(test_img, params)
-        # 5) Scale extracted features to be fed to classifier
-        test_features = scaler.transform(np.array(features).reshape(1, -1))
-        # 6) Predict using your classifier
-        prediction = clf.predict(test_features)
-        # 7) If positive (prediction == 1) then save the window
-        if prediction == 1:
-            on_windows.append(window)
-    # 8) Return windows for positive detections
-    return on_windows
-
 ystart = 400
 ystop = 656
 scale = 1.0
@@ -91,8 +20,8 @@ def find_car_bboxes(img, svc, X_scaler, params: data.ModelParams, debug=False, y
         tosearch = cv2.resize(tosearch, (np.int(imshape[1] / scale), np.int(imshape[0] / scale)))
 
     # Define blocks and steps as above
-    nxblocks = (tosearch.shape[1] // params.hog_pix_per_cell) - 1
-    nyblocks = (tosearch.shape[0] // params.hog_pix_per_cell) - 1
+    nxblocks = (tosearch.shape[1] // params.hog_pix_per_cell) + 1
+    nyblocks = (tosearch.shape[0] // params.hog_pix_per_cell) + 1
     # nfeat_per_block = params.hog_orient * params.hog_cell_per_block ** 2
     # 64 was the orginal sampling rate, with 8 cells and 8 pix per cell
     window = 64
@@ -192,8 +121,8 @@ def draw_labeled_bboxes(img, labels):
     return img
 
 
-scales = [1.0, 2.0, 4.0, 8.0, 16.0]
-def find_car_map(undist, svc, X_scaler, params):
+scales = [1.25, 1.5, 1.75, 2.0, 3.0, 4.0]
+def find_cars(undist, svc, X_scaler, params):
     bboxes = []
     for scale in scales:
         bboxes.extend(find_car_bboxes(undist, svc, X_scaler, params, scale=scale))
@@ -203,9 +132,9 @@ def find_car_map(undist, svc, X_scaler, params):
     heat = add_heat(heat, bboxes)
 
     # Apply threshold to help remove false positives
-    heat = apply_threshold(heat, 4)
+    heat = apply_threshold(heat, 10)
 
     # Visualize the heatmap when displaying
     heatmap = np.clip(heat, 0, 255)
 
-    return heatmap
+    return heatmap, bboxes

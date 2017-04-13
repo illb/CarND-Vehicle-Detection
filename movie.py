@@ -20,7 +20,7 @@ def pipeline(img):
 
     undist = cc.undistort(img, mtx, dist)
 
-    heatmap = ws.find_car_map(undist, svc, X_scaler, params)
+    heatmap = ws.find_cars(undist, svc, X_scaler, params)
 
     from scipy.ndimage.measurements import label
 
