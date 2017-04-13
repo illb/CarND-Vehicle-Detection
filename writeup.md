@@ -14,8 +14,6 @@ The goals / steps of this project are the following:
 * Estimate a bounding box for vehicles detected.
 
 [//]: # (Image References)
-[image1]: ./examples/car_not_car.png
-[image2]: ./examples/HOG_example.jpg
 [image3]: ./examples/sliding_windows.jpg
 [image4]: ./examples/sliding_window.jpg
 [image5]: ./examples/bboxes_and_heat.png
@@ -52,42 +50,87 @@ You're reading it!
 
 * I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
-* vehicle
+* sample image
+  * vehicle / non vehicle
 
-![vehicle1](./output_images/train_vehicle_001.png =64x)
+![vehicle_1](./output_images/train_vehicle_001.png =64x)
+![non_vehicle_1](./output_images/train_non_vehicle_001.png =64x)
 
-* non vehicle
+* In the YCrCb color space image, extract hog feature by channel.
+  * `get_hog_features` function in `feature.py` can extract hog features
 
-![non_vehicle1](./output_images/train_non_vehicle_001.png =64x)
+  * vehicle sample (Y,Cr,Cb) / vehicle hog (Y,Cr,Cb)
 
-* 
+![vehicle_channel_Y_1](./output_images/feature_channel_Y_train_vehicle_001.png =64x)
+![vehicle_channel_Cr_1](./output_images/feature_channel_Cr_train_vehicle_001.png =64x)
+![vehicle_channel_Cb_1](./output_images/feature_channel_Cb_train_vehicle_001.png =64x)
+![vehicle_hog_Y_1](./output_images/feature_hog_Y_train_vehicle_001.png =64x)
+![vehicle_hog_Cr_1](./output_images/feature_hog_Cr_train_vehicle_001.png =64x)
+![vehicle_hog_Cb_1](./output_images/feature_hog_Cb_train_vehicle_001.png =64x)
 
-I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+  * non vehicle sample (Y,Cr,Cb) / non vehicle hog (Y,Cr,Cb)
 
-Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
-
-
-![alt text][image2]
+![non_vehicle_channel_Y_1](./output_images/feature_channel_Y_train_non_vehicle_001.png =64x)
+![non_vehicle_channel_Cr_1](./output_images/feature_channel_Cr_train_non_vehicle_001.png =64x)
+![non_vehicle_channel_Cb_1](./output_images/feature_channel_Cb_train_non_vehicle_001.png =64x)
+![non_vehicle_hog_Y_1](./output_images/feature_hog_Y_train_non_vehicle_001.png =64x)
+![non_vehicle_hog_Cr_1](./output_images/feature_hog_Cr_train_non_vehicle_001.png =64x)
+![non_vehicle_hog_Cb_1](./output_images/feature_hog_Cb_train_non_vehicle_001.png =64x)
 
 ####2. Explain how you settled on your final choice of HOG parameters.
 
-I tried various combinations of parameters and...
+* I used a hog vector in all directions
+* to make subsampling easier, I set the cell size to 3 powers of 2
+* parameters
+  * orient : 9
+  * pix_per_cell : 8
+  * cell_per_block : 2
 
 ####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVM using...
+* normalize fit a per-column scaler
+  * line 23 in `train.py`
+
+* split 80% of train set and 20% of test set
+
+* trained a linear SVM 
+  * lines 42 ~ 45 in `train.py`
+
+* added color histogram features
+  * vehicle color histogram
+
+![vehicle_color_histogram_1](./output_images/feature_color_histogram_vehicle_001.png =800x)
+
+  * non vehicle color histogram
+
+![non_vehicle_color_histogram_1](./output_images/feature_color_histogram_non_vehicle_001.png =800x)
+
+* added spatial binning of color
+  * vehicle spatially binned
+![spatially_binned_train_vehicle](./output_images/feature_spatially_binned_train_vehicle_001.png =800x)
+  
+  * non vehicle spatially binned
+![spatially_binned_train_non_vehicle](./output_images/feature_spatially_binned_train_non_vehicle_001.png =800x)
 
 ###Sliding Window Search
 
 ####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
-
-![alt text][image3]
+* 
 
 ####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
 Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+
+![test1](./test_images/test1.jpg =400x)
+![test1](./output_images/test1.jpg =400x)
+
+![test2](./test_images/test2.jpg =400x)
+![test2](./test_images/test2.jpg =400x)
+
+![test3](./test_images/test3.jpg =400x)
+![test3](./test_images/test3.jpg =400x)
+
 
 ![alt text][image4]
 ---
@@ -95,7 +138,7 @@ Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spat
 ### Video Implementation
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./output_project_video.mp4)
 
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
