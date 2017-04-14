@@ -143,22 +143,22 @@ Here's an example result showing the heatmap from a series of frames of video, t
 ### Here are six frames and their corresponding heatmaps:
 
 ![frame1](./test_images/test_video_frames/1.jpg =300x)
-![frame1](./output_images/window_heatmap_test1.png =300x)
+![frame1](./output_images/window_heatmap_frame1.png =300x)
 
 ![frame2](./test_images/test_video_frames/2.jpg =300x)
-![frame2](./output_images/window_heatmap_test2.png =300x)
+![frame2](./output_images/window_heatmap_frame2.png =300x)
 
 ![frame3](./test_images/test_video_frames/3.jpg =300x)
-![frame3](./output_images/window_heatmap_test3.png =300x)
+![frame3](./output_images/window_heatmap_frame3.png =300x)
 
 ![frame4](./test_images/test_video_frames/4.jpg =300x)
-![frame4](./output_images/window_heatmap_test4.png =300x)
+![frame4](./output_images/window_heatmap_frame4.png =300x)
 
 ![frame5](./test_images/test_video_frames/5.jpg =300x)
-![frame5](./output_images/window_heatmap_test5.png =300x)
+![frame5](./output_images/window_heatmap_frame5.png =300x)
 
 ![frame6](./test_images/test_video_frames/6.jpg =300x)
-![frame6](./output_images/window_heatmap_test6.png =300x)
+![frame6](./output_images/window_heatmap_frame6.png =300x)
 
 
 ### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
