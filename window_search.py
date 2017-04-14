@@ -1,4 +1,5 @@
 import numpy as np
+import collections
 import cv2
 import feature
 import util
@@ -120,21 +121,36 @@ def draw_labeled_bboxes(img, labels):
     # Return the image
     return img
 
+SCALES = [1.0, 1.5, 2.0, 4.0]
+MAX_FRAME_COUNT = 6
 
-scales = [1.25, 1.5, 1.75, 2.0, 3.0, 4.0]
-def find_cars(undist, svc, X_scaler, params):
-    bboxes = []
-    for scale in scales:
-        bboxes.extend(find_car_bboxes(undist, svc, X_scaler, params, scale=scale))
+class CarFinder:
+    def __init__(self, svc, X_scaler, params, max_frame_count=MAX_FRAME_COUNT):
+        self.scales = SCALES
+        self.svc = svc
+        self.scaler = X_scaler
+        self.params = params
+        self.max_frame_count = max_frame_count
+        self.queue = collections.deque(maxlen=max_frame_count)
 
-    heat = np.zeros_like(undist[:, :, 0]).astype(np.float)
-    # Add heat to each box in box list
-    heat = add_heat(heat, bboxes)
+    def process_frame(self, frame):
+        bboxes = []
+        for scale in self.scales:
+            bboxes.extend(find_car_bboxes(frame, self.svc, self.scaler, self.params, scale=scale))
 
-    # Apply threshold to help remove false positives
-    heat = apply_threshold(heat, 10)
+        self.queue.appendleft(bboxes)
 
-    # Visualize the heatmap when displaying
-    heatmap = np.clip(heat, 0, 255)
+        heat = np.zeros_like(frame[:, :, 0]).astype(np.float)
+        # Add heat to each box in box list
+        for list in self.queue:
+            if len(list) > 0:
+                heat = add_heat(heat, list)
 
-    return heatmap, bboxes
+        count = len(self.queue)
+        # Apply threshold to help remove false positives
+        heat = apply_threshold(heat, count * 7)
+
+        # Visualize the heatmap when displaying
+        heatmap = np.clip(heat, 0, 255)
+
+        return heatmap

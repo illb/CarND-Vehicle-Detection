@@ -97,7 +97,7 @@ import random
 def _rand256():
     return random.randrange(0, 256)
 
-def save_windows():
+def save_bboxes():
     for i in range(6):
         path = "./test_images/test{}.jpg".format(i+1)
         img = util.imread(path)
@@ -114,26 +114,18 @@ def save_windows():
 
         cv2.imwrite(output_dir + "/window_scale_{}_".format(scale) + os.path.basename(path), draw_img)
 
+# save_bboxes()
 
-def save_window_searches():
+
+def save_bboxes_multiple_search():
     for i in range(6):
         path = "./test_images/test{}.jpg".format(i+1)
         img = util.imread(path)
         undist = cc.undistort(img, mtx, dist)
 
-        heatmap, bboxes = ws.find_cars(undist, svc, X_scaler, params)
-
-        plt.imshow(heatmap, cmap='hot')
-        plt.title('Heat Map')
-        plt.savefig(output_dir + "/window_heatmap_test{}.png".format(i+1))
-
-        from scipy.ndimage.measurements import label
-
-        # Find final boxes from heatmap using label function
-        labels = label(heatmap)
-
-        draw_img = ws.draw_labeled_bboxes(np.copy(undist), labels)
-        cv2.imwrite(output_dir + "/window_result_" + os.path.basename(path), draw_img)
+        bboxes = []
+        for scale in ws.SCALES:
+            bboxes.extend(ws.find_car_bboxes(undist, svc, X_scaler, params, scale=scale))
 
         draw_img = np.copy(undist)
         for bbox in bboxes:
@@ -141,4 +133,33 @@ def save_window_searches():
 
         cv2.imwrite(output_dir + "/window_bboxes_" + os.path.basename(path), draw_img)
 
-save_window_searches()
+# save_bboxes_multiple_search()
+
+
+def save_co_frame_search():
+    finder = ws.CarFinder(svc, X_scaler, params)
+    for i in range(6):
+        path = "./test_images/test_video_frames/{}.jpg".format(i+1)
+        print("frame {} seraching...".format(i+1))
+        img = util.imread(path)
+        undist = cc.undistort(img, mtx, dist)
+
+        heatmap = finder.process_frame(undist)
+
+        plt.imshow(heatmap, cmap='hot')
+        plt.title('Heat Map')
+        plt.savefig(output_dir + "/window_heatmap_frame{}.png".format(i+1))
+
+    from scipy.ndimage.measurements import label
+
+    # Find final boxes from heatmap using label function
+    labels = label(heatmap)
+
+    plt.imshow(labels[0], cmap='gray')
+    plt.title('Label')
+    plt.savefig(output_dir + "/window_label.png")
+
+    draw_img = ws.draw_labeled_bboxes(np.copy(undist), labels)
+    cv2.imwrite(output_dir + "/window_result.jpg", draw_img)
+
+save_co_frame_search()

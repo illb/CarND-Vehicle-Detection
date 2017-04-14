@@ -15,12 +15,14 @@ mtx, dist = cc.calibrate_camera(objpoints, imgpoints, img_size)
 
 svc, X_scaler, params = data.load_model()
 
+finder = ws.CarFinder(svc, X_scaler, params)
+
 def pipeline(img):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
     undist = cc.undistort(img, mtx, dist)
 
-    heatmap = ws.find_cars(undist, svc, X_scaler, params)
+    heatmap = finder.process_frame(undist)
 
     from scipy.ndimage.measurements import label
 
