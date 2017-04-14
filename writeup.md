@@ -13,13 +13,6 @@ The goals / steps of this project are the following:
 * Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
 * Estimate a bounding box for vehicles detected.
 
-[//]: # (Image References)
-[image3]: ./examples/sliding_windows.jpg
-[image4]: ./examples/sliding_window.jpg
-[image5]: ./examples/bboxes_and_heat.png
-[image6]: ./examples/labels_map.png
-[image7]: ./examples/output_bboxes.png
-[video1]: ./project_video.mp4
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
 ###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -116,23 +109,23 @@ You're reading it!
 
 ####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-* 
+* tuned parameters with `debug_interative_window_search.ipynb`
+  * overlap : 0.25 (cells_per_step = 2)
+  * scale : 1.0, 1.5, 2.0, 4.0
 
 ####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+Ultimately I searched on 4 scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
 
-![test1](./test_images/test1.jpg =400x)
-![test1](./output_images/test1.jpg =400x)
+![test1](./output_images/window_bboxes_test1.jpg =300x)
+![test2](./output_images/window_bboxes_test2.jpg =300x)
 
-![test2](./test_images/test2.jpg =400x)
-![test2](./test_images/test2.jpg =400x)
+![test3](./output_images/window_bboxes_test3.jpg =300x)
+![test4](./output_images/window_bboxes_test4.jpg =300x)
 
-![test3](./test_images/test3.jpg =400x)
-![test3](./test_images/test3.jpg =400x)
+![test5](./output_images/window_bboxes_test5.jpg =300x)
+![test6](./output_images/window_bboxes_test6.jpg =300x)
 
-
-![alt text][image4]
 ---
 
 ### Video Implementation
@@ -149,14 +142,33 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 ### Here are six frames and their corresponding heatmaps:
 
-![alt text][image5]
+![frame1](./test_images/test_video_frames/1.jpg =300x)
+![frame1](./output_images/window_heatmap_test1.png =300x)
+
+![frame2](./test_images/test_video_frames/2.jpg =300x)
+![frame2](./output_images/window_heatmap_test2.png =300x)
+
+![frame3](./test_images/test_video_frames/3.jpg =300x)
+![frame3](./output_images/window_heatmap_test3.png =300x)
+
+![frame4](./test_images/test_video_frames/4.jpg =300x)
+![frame4](./output_images/window_heatmap_test4.png =300x)
+
+![frame5](./test_images/test_video_frames/5.jpg =300x)
+![frame5](./output_images/window_heatmap_test5.png =300x)
+
+![frame6](./test_images/test_video_frames/6.jpg =300x)
+![frame6](./output_images/window_heatmap_test6.png =300x)
+
 
 ### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
+![label](./output_images/window_label.png =400x)
+
+
 
 ### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
 
+![result](./output_images/window_result.jpg =400x)
 
 
 ---
@@ -165,9 +177,13 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+* disadvantages of SVM
+  * single SVM prediction is so fast
+  * but it must be searched multiple times through window search, resulting in slow
+  * there are many false positive
 
-* using another architecture  : https://www.slideshare.net/xavigiro/ssd-single-shot-multibox-detector
-  * Faster RNN : https://github.com/smallcorgi/Faster-RCNN_TF
-  * YOLO : https://pjreddie.com/darknet/yolo/
-  * SSD : https://github.com/rykov8/ssd_keras
+* I think there are better architectures than SVM
+  * https://www.slideshare.net/xavigiro/ssd-single-shot-multibox-detector
+    * Faster RNN : https://github.com/smallcorgi/Faster-RCNN_TF
+    * YOLO : https://pjreddie.com/darknet/yolo/
+    * SSD : https://github.com/rykov8/ssd_keras
